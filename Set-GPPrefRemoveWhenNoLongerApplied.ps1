@@ -58,15 +58,15 @@ Function Set-GPPrefRemoveWhenNoLongerApplied
         $ProgressPreference = "SilentlyContinue"
         IF ((Get-WindowsFeature -Name GPMC -ErrorAction SilentlyContinue).InstallState -ne "Installed")
             {
-                Write-Host "Adding GPMC Module to Powershell..." -ForegroundColor Yellow
+                IF (!$Silent) { Write-Host "Adding GPMC Module to Powershell..." -ForegroundColor Yellow }
                 Install-WindowsFeature -Name GPMC -IncludeAllSubFeature -IncludeManagementTools -ErrorAction SilentlyContinue -Confirm:$false
-                Write-Host "Installed!" -ForegroundColor Green
+                IF (!$Silent) { Write-Host "Installed!" -ForegroundColor Green }
             }
         $ProgressPreference = $OrignalPref
 
         IF ((Get-WmiObject -Class Win32_OperatingSystem).ProductType -ne "2")
             {
-                Write-Host "!!!Warning!!!`n`nThis is not a Domain Controller.`nThis function must be used on the Domain Controller"
+                IF (!$Silent) { Write-Host "!!!Warning!!!`n`nThis is not a Domain Controller.`nThis function must be used on the Domain Controller" }
             }
         ELSE
             {
@@ -79,21 +79,21 @@ Function Set-GPPrefRemoveWhenNoLongerApplied
 
                 Foreach ($XMLPath in $XMLPaths)
                     {
-                        Write-Host "Checking for $($XMLPath.Desc) Setting..." -ForegroundColor Magenta
+                        IF (!$Silent) { Write-Host "Checking for $($XMLPath.Desc) Setting..." -ForegroundColor Magenta }
                         IF (!(Test-Path -LiteralPath $XMLPath.Path -ErrorAction SilentlyContinue))
                             {
-                                Write-Host "No $($XMLPath.Desc) Settings Found!" -ForegroundColor Cyan
+                                IF (!$Silent) { Write-Host "No $($XMLPath.Desc) Settings Found!" -ForegroundColor Cyan }
                             }
                         ELSE
                             {
-                                Write-Host "$($XMLPath.Desc) Settings Found!" -ForegroundColor Yellow
-                                Write-Host "Checking Registry Preferences in $($XMLPath.Desc) Settings..." -ForegroundColor Yellow
+                                IF (!$Silent) { Write-Host "$($XMLPath.Desc) Settings Found!" -ForegroundColor Yellow }
+                                IF (!$Silent) { Write-Host "Checking Registry Preferences in $($XMLPath.Desc) Settings..." -ForegroundColor Yellow }
                                 [xml]$XMLContent = Get-Content $XMLPath.Path
                                 $RegistrySettings = $XMLContent.Registrysettings.Registry
                                 $RegistrySettingsNotRemoved = $RegistrySettings | Where-Object RemovePolicy -eq $null
                                 IF (!$RegistrySettingsNotRemoved)
                                     {
-                                        Write-Host "All $($RegistrySettings.count) Preferences Have `"Remove this item if it is no longer applied`" Set!" -ForegroundColor Green
+                                        IF (!$Silent) { Write-Host "All $($RegistrySettings.count) Preferences Have `"Remove this item if it is no longer applied`" Set!" -ForegroundColor Green }
                                     }
                                 ELSE
                                     {
@@ -114,7 +114,7 @@ Function Set-GPPrefRemoveWhenNoLongerApplied
                                                         $RegistrySettings = $XMLContent.Registrysettings.Registry
                                                         $RegistrySettingsNotRemoved = $RegistrySettings | Where-Object RemovePolicy -eq $null
                                                     }
-                                                Write-Host "Adjusted! No More Incorrect Settings!" -ForegroundColor Yellow
+                                                IF (!$Silent) { Write-Host "Adjusted! No More Incorrect Settings!" -ForegroundColor Yellow }
                                             }
                                         ELSE
                                             {
@@ -133,7 +133,7 @@ Function Set-GPPrefRemoveWhenNoLongerApplied
                                                                 $RegistrySettings = $XMLContent.Registrysettings.Registry
                                                                 $RegistrySettingsNotRemoved = $RegistrySettings | Where-Object RemovePolicy -eq $null
                                                             }
-                                                        Write-Host "Adjusted! No More Incorrect Settings!" -ForegroundColor Yellow
+                                                        IF (!$Silent) { Write-Host "Adjusted! No More Incorrect Settings!" -ForegroundColor Yellow }
                                                     }
                                             }
                                     }
